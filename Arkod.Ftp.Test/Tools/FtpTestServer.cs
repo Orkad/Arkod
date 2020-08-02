@@ -17,7 +17,11 @@ namespace Arkod.Ftp.Test
 
         public FtpTestServer(string server, int port = 21)
         {
-            FtpDirectory = Path.Combine(Path.GetTempPath(), "FtpTestServer", Guid.NewGuid().ToString());
+            FtpDirectory = Path.Combine(Path.GetTempPath(), "FtpTestServer");
+            if (!Directory.Exists(FtpDirectory))
+            {
+                Directory.CreateDirectory(FtpDirectory);
+            }
             var ftpdminExeLocation = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Resources\ftpdmin.exe");
             var processStartInfo = new ProcessStartInfo
             {
@@ -25,8 +29,6 @@ namespace Arkod.Ftp.Test
                 Arguments = @$"-p {port} -ha {server} ""{FtpDirectory}""",
                 WindowStyle = ProcessWindowStyle.Normal,
                 RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
             };
             //Vista or higher check
             if (Environment.OSVersion.Version.Major >= 6)
@@ -42,15 +44,16 @@ namespace Arkod.Ftp.Test
 
         public void Dispose()
         {
-            if (Directory.Exists(FtpDirectory))
-            {
-                Directory.Delete(FtpDirectory, true);
-            }
             if (!ftpProcess.HasExited)
             {
                 ftpProcess.Kill();
                 ftpProcess.WaitForExit();
             }
+            if (Directory.Exists(FtpDirectory))
+            {
+                Directory.Delete(FtpDirectory, true);
+            }
+            
         }
     }
 }
