@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="WinSCP" Version="5.17.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Arkod\Arkod.csproj" />
+  </ItemGroup>
+
+</Project>
