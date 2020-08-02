@@ -15,32 +15,45 @@ namespace Arkod.Ftp
         private readonly string server;
         private readonly ICredentials credentials;
         private readonly Dictionary<string, string> files;
-        private readonly Timer Timer;
-        private readonly int FrequencyMs;
-        private readonly object locker = new object();
+        private bool looping = false;
         public FtpFileSystemWatcher(string server, ICredentials credentials)
         {
             this.server = server;
             this.credentials = credentials;
             files = GetFtpFiles();
-            FrequencyMs = 1000;
-            Timer = new Timer(s => HandleFiles(), null, 0, FrequencyMs);
+            looping = true;
+            new Thread(Loop).Start();
         }
 
         private Dictionary<string, string> GetFtpFiles()
         {
-            Dictionary<string, string> result = new Dictionary<string, string>();
-            var fileResponse = CallFtpMethod(WebRequestMethods.Ftp.ListDirectory);
+            var detailSet = new HashSet<string>();
             var detailedResponse = CallFtpMethod(WebRequestMethods.Ftp.ListDirectoryDetails);
-            using (var fileResponseReader = new StreamReader(fileResponse.GetResponseStream()))
             using (var detailedResponseReader = new StreamReader(detailedResponse.GetResponseStream()))
             {
-                while (!(fileResponseReader.EndOfStream && detailedResponseReader.EndOfStream))
+                while (!detailedResponseReader.EndOfStream)
+                {
+                    detailSet.Add(detailedResponseReader.ReadLine());
+                }
+            }
+
+            Dictionary<string, string> result = new Dictionary<string, string>();
+            var fileResponse = CallFtpMethod(WebRequestMethods.Ftp.ListDirectory);
+            using (var fileResponseReader = new StreamReader(fileResponse.GetResponseStream()))
+            {
+                while (!fileResponseReader.EndOfStream)
                 {
                     var fileLine = fileResponseReader.ReadLine();
-                    var detailedLine = detailedResponseReader.ReadLine();
-                    result.Add(fileLine, detailedLine);
+                    foreach (var detail in detailSet)
+                    {
+                        if (detail.EndsWith(fileLine))
+                        {
+                            result.Add(fileLine, detail);
+                            break;
+                        }
+                    }
                 }
+                
             }
             return result;
         }
@@ -53,43 +66,76 @@ namespace Arkod.Ftp
             return ftpWebRequest.GetResponse();
         }
 
+        private void Loop()
+        {
+            var delta = 0;
+            while (looping)
+            {
+                var sleep = Frequency - delta;
+                if(sleep > 0)
+                {
+                    Thread.Sleep(sleep);
+                }
+                var sw = new Stopwatch();
+                sw.Start();
+                HandleFiles(); // <<< Main method
+                sw.Stop();
+                delta = (int)sw.ElapsedMilliseconds;
+            }
+        }
+
         private void HandleFiles()
         {
-            var stopWatch = new Stopwatch();
-            stopWatch.Start();
-            
-            lock (locker)
+            // change tracking
+            files.TrackChanges(GetFtpFiles(), true, out var changed, out var added, out var removed);
+            foreach (var change in changed)
             {
-                stopWatch.Stop();
-                var lockedMs = stopWatch.ElapsedMilliseconds;
-                if (lockedMs >= FrequencyMs)
-                {
-                    return;
-                }
-                // change tracking
-                files.TrackChanges(GetFtpFiles(), true, out var changed, out var added, out var removed);
-                foreach (var change in changed)
+                if (EnableRaisingEvents)
                 {
                     Changed?.Invoke(this, new FtpFileSystemEventArgs { ChangeType = FtpWatcherChangeTypes.Changed, FullPath = change.Key, Name = change.Key });
                 }
-                foreach (var add in added)
+            }
+            foreach (var add in added)
+            {
+                if (EnableRaisingEvents)
                 {
                     Created?.Invoke(this, new FtpFileSystemEventArgs { ChangeType = FtpWatcherChangeTypes.Created, FullPath = add.Key, Name = add.Key });
                 }
-                foreach (var remove in removed)
+            }
+            foreach (var remove in removed)
+            {
+                if (EnableRaisingEvents)
                 {
                     Deleted?.Invoke(this, new FtpFileSystemEventArgs { ChangeType = FtpWatcherChangeTypes.Deleted, FullPath = remove.Key, Name = remove.Key });
                 }
             }
         }
 
+        /// <summary>
+        /// Gets or sets the path of the ftp directory to watch. Based on the root directory
+        /// </summary>
         [DefaultValue("")]
         [SettingsBindable(true)]
         public string Path { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether subdirectories within the specified path should be monitored.
+        /// </summary>
         [DefaultValue("*.*")]
         [SettingsBindable(true)]
         public string Filter { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the component is enabled.
+        /// </summary>
+        [DefaultValue(false)]
+        public bool EnableRaisingEvents { get; set; }
+
+        /// <summary>
+        /// Frequency in milliseconds used to call the FTP server (default: 1 second)
+        /// </summary>
+        [DefaultValue(1000)]
+        public int Frequency { get; set; } = 1000;
 
         /// <summary>
         /// Occurs when a ftp file in the specified <see cref="Path"/> that match the <see cref="Filter"/> is deleted.
@@ -110,7 +156,7 @@ namespace Arkod.Ftp
         {
             if (disposing)
             {
-                Timer.Dispose();
+                looping = false;
             }
             base.Dispose(disposing);
         }

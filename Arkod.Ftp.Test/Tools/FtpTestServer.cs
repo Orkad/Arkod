@@ -23,22 +23,11 @@ namespace Arkod.Ftp.Test
                 Directory.CreateDirectory(FtpDirectory);
             }
             var ftpdminExeLocation = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Resources\ftpdmin.exe");
-            var processStartInfo = new ProcessStartInfo
-            {
-                FileName = ftpdminExeLocation,
-                Arguments = @$"-p {port} -ha {server} ""{FtpDirectory}""",
-                WindowStyle = ProcessWindowStyle.Normal,
-                RedirectStandardOutput = true,
-            };
-            //Vista or higher check
-            if (Environment.OSVersion.Version.Major >= 6)
-            {
-                processStartInfo.Verb = "runas";
-            }
-            ftpProcess = Process.Start(processStartInfo);
+            ftpProcess = Process.Start(ftpdminExeLocation, @$"-p {port} -ha {server} ""{FtpDirectory}""");
+            Thread.Sleep(50); // wait for process correctly starting
             if (ftpProcess.HasExited)
             {
-                throw new InvalidOperationException($"Impossible de lancer correctement le processus ftpdmin : {ftpProcess.StandardOutput.ReadToEnd()}");
+                throw new InvalidOperationException($"Impossible de lancer correctement le processus ftpdmin");
             }
         }
 
@@ -53,7 +42,6 @@ namespace Arkod.Ftp.Test
             {
                 Directory.Delete(FtpDirectory, true);
             }
-            
         }
     }
 }
