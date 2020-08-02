@@ -33,17 +33,17 @@ namespace Arkod.Ftp.Test
                     watcher.Deleted += (e, arg) => removed.Add(arg.FullPath);
 
                     var fileToAdd = CreateTmpFile();
+                    var fileName = "SuperFile.tmp";
                     // make actions on the ftp
                     using (var client = new WebClient())
                     {
                         client.Credentials = credential;
-                        var fileName = "SuperFile.tmp";
                         client.UploadFile(new Uri(new Uri(FTP_ADRESS), fileName), WebRequestMethods.Ftp.UploadFile, fileToAdd);
                     }
+                    Thread.Sleep(1000);
+                    Check.That(added).Contains(fileName);
                 }
             }
-            Thread.Sleep(60000);
-            Check.That(added).HasSize(1);
         }
 
         private static string CreateTmpFile()
