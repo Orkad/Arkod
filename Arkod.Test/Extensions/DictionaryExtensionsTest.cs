@@ -3,7 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NFluent;
 using System.Collections.Generic;
 
-namespace Arkod.Test
+namespace Arkod.Test.Extensions
 {
     [TestClass]
     public class DictionaryExtensionsTest
