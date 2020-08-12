@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arkod.Ftp", "Arkod.Ftp\Arko
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arkod.Ftp.Test", "Arkod.Ftp.Test\Arkod.Ftp.Test.csproj", "{A6783E67-F694-4715-90AE-3F1A9D8D3C9A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arkod.Test", "Arkod.Test\Arkod.Test.csproj", "{D0869EE7-44BD-45D9-8560-DF58C663DCDE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arkod.Test", "Arkod.Test\Arkod.Test.csproj", "{D0869EE7-44BD-45D9-8560-DF58C663DCDE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arkod.Raspberry.Sample", "Arkod.Raspberry.Sample\Arkod.Raspberry.Sample.csproj", "{0FB29F27-A740-4E3D-B11B-E86490056D27}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{D0869EE7-44BD-45D9-8560-DF58C663DCDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D0869EE7-44BD-45D9-8560-DF58C663DCDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D0869EE7-44BD-45D9-8560-DF58C663DCDE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0FB29F27-A740-4E3D-B11B-E86490056D27}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0FB29F27-A740-4E3D-B11B-E86490056D27}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0FB29F27-A740-4E3D-B11B-E86490056D27}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0FB29F27-A740-4E3D-B11B-E86490056D27}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
