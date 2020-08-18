@@ -3,12 +3,17 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <AssemblyName>sample</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.8.0" />
     <PackageReference Include="Unosquare.Raspberry.IO" Version="0.27.0" />
     <PackageReference Include="Unosquare.WiringPi" Version="0.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Arkod\Arkod.csproj" />
   </ItemGroup>
 
 </Project>
